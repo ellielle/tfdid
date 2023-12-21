@@ -1,1 +1,3 @@
 .mypy_cache
+tfdid.html
+*/**/__pycache__/
