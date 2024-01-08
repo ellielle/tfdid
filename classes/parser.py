@@ -5,13 +5,13 @@ from utils.decorators import log
 
 class DirectoryScan:
     def __init__(self) -> None:
-        self.scan_results = {}
+        # self.scan_results = {}
         self.size_scale = None
         self.directory = Path.cwd()
         self.search_all = False
         self.parser = self._init_parser()
         self._parse_args(self.parser.parse_args())
-        self.file_tree = []
+        # self.file_tree: list[str] = []
         # directory tree components
         self.dir_space = "    "
         self.dir_branch = "│   "
