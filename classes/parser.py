@@ -5,7 +5,6 @@ from utils.decorators import log
 
 class DirectoryScan:
     def __init__(self) -> None:
-        # TODO: store results in a Trie
         self.scan_results = {}
         self.size_scale = None
         self.directory = Path.cwd()
@@ -37,10 +36,11 @@ class DirectoryScan:
             action="store",
             help="directory to scan (default: current directory)",
         )
-        # optionally search hidden files and folders
         # TODO: add 'a' as a sub-argument to another argument that sets the mode
-        # TODO: make "tree"-like functionality with sizes as default mode
-        # TODO: gui mode required for more detailed graph?
+        # make "tree"-like functionality with sizes as default mode
+        # gui mode required for more detailed graph?
+
+        # optionally search hidden files and folders
         parser.add_argument(
             "-a",
             "--all",
@@ -49,6 +49,7 @@ class DirectoryScan:
             default=False,
             help="search hidden files and folders",
         )
+
         """
         change the output scale for SIZE.
         Scaling default is in blocks, and is optionally scaled up in bytes using this option
@@ -95,17 +96,28 @@ class DirectoryScan:
         self.size_scale = args.size
         self.search_all = args.all
 
-        # TODO: check args and throw error
+        # TODO: finish arg checking and throw errors where needed
 
     def run_dir_scan(self, dir_path: Path = Path("."), prefix: str = ""):
-        # TODO: add file / directory sizes
+        """
+        a recursive generator, given a valid Path object, will yield a visual tree
+        structure line by line, prefixed by glyphs to draw the structure.
+        Heavily helped by https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python/59109706#59109706
+        """
+
+        # add a "." to indicate the starting directory in the tree, then set working dir
         if dir_path == Path("."):
+            print(dir_path)
             dir_path = Path(self.directory)
+
         dir_tree = list(dir_path.iterdir())
+        # each item in the tree list gets a prefixed glyph
         structure = [self.dir_item] * (len(dir_tree) - 1) + [self.dir_last]
 
+        # TODO: add file / directory sizes
         for glyph, path in zip(structure, dir_tree):
             yield prefix + glyph + path.name
+            # extends the prefix and recurses into directory
             if path.is_dir():
                 extension = (
                     self.dir_branch if glyph == self.dir_item else self.dir_space
