@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from classes.parser import DirectoryScan
 
 
@@ -14,3 +15,5 @@ def generate_directory_tree(dir_path):
 
 if __name__ == "__main__":
     parser = DirectoryScan()
+    for line in parser.run_dir_scan():
+        print(line)
