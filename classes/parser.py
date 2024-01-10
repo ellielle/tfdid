@@ -98,6 +98,10 @@ class DirectoryScan:
 
         # TODO: finish arg checking and throw errors where needed
 
+    def _convert_block_size(self, blocks: int) -> int:
+        sizes = {"K": 1, "M": 2, "G": 3, "T": 4, "P": 5, "E": 6}
+        # FIXME: finish size conversion
+
     def run_dir_scan(self, dir_path: Path = Path("."), prefix: str = ""):
         """
         a recursive generator, given a valid Path object, will yield a visual tree
@@ -115,8 +119,10 @@ class DirectoryScan:
         structure = [self.dir_item] * (len(dir_tree) - 1) + [self.dir_last]
 
         # TODO: add file / directory sizes
+        # add option to find X largest files/folders instead of a tree
         for glyph, path in zip(structure, dir_tree):
-            yield prefix + glyph + path.name
+            # yield (prefix + glyph + path.name + str.rjust(str(path.stat().st_size), 40))
+            yield f"{prefix + glyph + path.name : <50} {str(path.stat().st_size) : <10}"
             # extends the prefix and recurses into directory
             if path.is_dir():
                 extension = (
