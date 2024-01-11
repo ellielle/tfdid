@@ -5,14 +5,12 @@ from utils.decorators import log
 
 class DirectoryScan:
     def __init__(self) -> None:
-        # self.scan_results = {}
-        self.size_scale = None
+        self.size_scale = "block"
         self.directory = Path.cwd()
         self.search_all = False
         self.parser = self._init_parser()
         self._parse_args(self.parser.parse_args())
-        # self.file_tree: list[str] = []
-        # directory tree components
+        # directory tree glyphs
         self.dir_space = "    "
         self.dir_branch = "│   "
         self.dir_item = "├── "
@@ -36,9 +34,6 @@ class DirectoryScan:
             action="store",
             help="directory to scan (default: current directory)",
         )
-        # TODO: add 'a' as a sub-argument to another argument that sets the mode
-        # make "tree"-like functionality with sizes as default mode
-        # gui mode required for more detailed graph?
 
         # optionally search hidden files and folders
         parser.add_argument(
@@ -50,11 +45,6 @@ class DirectoryScan:
             help="search hidden files and folders",
         )
 
-        """
-        change the output scale for SIZE.
-        Scaling default is in blocks, and is optionally scaled up in bytes using this option
-        Ex: KB = blocks x 1024 / 512 (512 bytes in a block)
-        """
         parser.add_argument(
             "-s",
             "--size",
@@ -64,24 +54,6 @@ class DirectoryScan:
             default="block",
             choices=["K", "M", "G", "T", "P", "E"],
             help="scale block size by SIZE (default: %(default)s). Choices: %(choices)s",
-        )
-        parser.add_argument(
-            "-d",
-            "--depth",
-            dest="depth",
-            action="store",
-            default="4",
-            help="only search this many directories deep (default: %(default)s)",
-        )
-
-        # TODO: enable GUI
-        parser.add_argument(
-            "-i",
-            "--interactive",
-            dest="interactive",
-            action="store_true",
-            default=False,
-            help="start with GUI",
         )
 
         return parser
@@ -96,11 +68,17 @@ class DirectoryScan:
         self.size_scale = args.size
         self.search_all = args.all
 
-        # TODO: finish arg checking and throw errors where needed
-
-    def _convert_block_size(self, blocks: int) -> int:
+    def _convert_block_size(self, blocks: int) -> float:
+        """
+        change the output scale for SIZE.
+        Scaling default is in blocks, and is optionally scaled up in bytes using this option
+        Ex: KB = blocks / 1024
+        """
         sizes = {"K": 1, "M": 2, "G": 3, "T": 4, "P": 5, "E": 6}
-        # FIXME: finish size conversion
+        if self.size_scale == "block":
+            return blocks
+
+        return round(blocks / (1024 * sizes[self.size_scale]), 1)
 
     def run_dir_scan(self, dir_path: Path = Path("."), prefix: str = ""):
         """
@@ -108,21 +86,27 @@ class DirectoryScan:
         structure line by line, prefixed by glyphs to draw the structure.
         Heavily helped by https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python/59109706#59109706
         """
-
         # add a "." to indicate the starting directory in the tree, then set working dir
         if dir_path == Path("."):
-            print(dir_path)
+            print(
+                f"[{str(self._convert_block_size(dir_path.stat().st_size)) + self.size_scale}]",
+                ".",
+            )
             dir_path = Path(self.directory)
 
-        dir_tree = list(dir_path.iterdir())
-        # each item in the tree list gets a prefixed glyph
+        if self.search_all:
+            dir_tree = list(dir_path.iterdir())
+        else:
+            dir_tree = [
+                d for d in dir_path.iterdir() if not str(d.name).startswith(".")
+            ]
+
+        # each item in the tree list is prefixed with a glyph and file/dir size
         structure = [self.dir_item] * (len(dir_tree) - 1) + [self.dir_last]
 
-        # TODO: add file / directory sizes
-        # add option to find X largest files/folders instead of a tree
+        # TODO: add option to find X largest files/folders instead of a tree
         for glyph, path in zip(structure, dir_tree):
-            # yield (prefix + glyph + path.name + str.rjust(str(path.stat().st_size), 40))
-            yield f"{prefix + glyph + path.name : <50} {str(path.stat().st_size) : <10}"
+            yield f"{prefix + glyph + '[' + str(self._convert_block_size(path.stat().st_size)) + self.size_scale + '] ' + path.name}"
             # extends the prefix and recurses into directory
             if path.is_dir():
                 extension = (
