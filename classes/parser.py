@@ -78,7 +78,7 @@ class DirectoryScan:
         if self.size_scale == "block":
             return blocks
 
-        return round(blocks / (1024 * sizes[self.size_scale]), 1)
+        return round(blocks / (1024 ** sizes[self.size_scale]), 2)
 
     def run_dir_scan(self, dir_path: Path = Path("."), prefix: str = ""):
         """
