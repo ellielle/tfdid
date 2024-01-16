@@ -5,6 +5,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 
+# decorator to help pinpoint bug locations
 def log(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
