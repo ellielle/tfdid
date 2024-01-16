@@ -1,6 +1,8 @@
 # tfdid
 
-tfdid is a project created for [Boot.dev](https://boot.dev) to parse directory trees and display size information, similar to the `tree` utility.
+tfdid (TF Did I Download?) is a cli tool written in Python to parse directory trees and display size information, similar to the `tree` utility, though not as fully-featured.
+
+Why? I wanted to play around with recursive generators, mostly. And I wanted to look around at what bloats my WSL images so heavily over time.
 
 ## Features
 
@@ -9,6 +11,12 @@ tfdid is a project created for [Boot.dev](https://boot.dev) to parse directory t
 - Size is by default in blocks, can be scaled with `--size` to KB, MB, etc
 
 - Omits hidden directories by default, enabled with `--all`
+
+## Potential improvements
+
+[ ] Add option to only return X largest files or directories
+
+[ ] Add option to search for known file bloat, such as `node_modules`
 
 ## Requirements
 
