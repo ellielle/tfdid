@@ -14,9 +14,9 @@ Why? I wanted to play around with recursive generators, mostly. And I wanted to 
 
 ## Potential improvements
 
-[ ] Add option to only return X largest files or directories
+- [ ] Add option to only return X largest files or directories
 
-[ ] Add option to search for known file bloat, such as `node_modules`
+- [ ] Add option to search for known file bloat, such as `node_modules`
 
 ## Requirements
 
