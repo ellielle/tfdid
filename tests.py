@@ -34,13 +34,11 @@ class Tests(unittest.TestCase):
         args = self.dirscan.parser.parse_args()
         self.assertEqual(args.directory, os.getcwd())
         self.assertFalse(args.all)
-        self.assertFalse(args.interactive)
         self.assertEqual(args.size, "block")
 
     def test_initializes_with_args(self):
-        args = self.dirscan.parser.parse_args(["~/", "-a", "-i"])
+        args = self.dirscan.parser.parse_args(["~/", "-a"])
         self.assertEqual(args.directory, "~/")
-        self.assertTrue(args.interactive)
         self.assertTrue(args.all)
 
     def test_initializes_with_size_scale(self):
