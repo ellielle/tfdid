@@ -1,4 +1,5 @@
 import argparse
+from collections.abc import Generator
 from pathlib import Path
 from utils.decorators import log
 
@@ -59,7 +60,7 @@ class DirectoryScan:
 
         return parser
 
-    def _parse_args(self, args: argparse.Namespace):
+    def _parse_args(self, args: argparse.Namespace) -> None:
         # check if target directory exists
         if not Path(args.directory).exists():
             self.parser.error("directory does not exist")
@@ -81,7 +82,9 @@ class DirectoryScan:
 
         return round(blocks / (1024 ** sizes[self.size_scale]), 2)
 
-    def run_dir_scan(self, dir_path: Path = Path("."), prefix: str = ""):
+    def run_dir_scan(
+        self, dir_path: Path = Path("."), prefix: str = ""
+    ) -> Generator[str, str, None]:
         """
         a recursive generator, given a valid Path object, will yield a visual tree
         structure line by line, prefixed by glyphs to draw the structure.
