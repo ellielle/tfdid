@@ -45,6 +45,7 @@ class DirectoryScan:
             help="search hidden files and folders",
         )
 
+        # change size scale from blocks to more human-readable formats
         parser.add_argument(
             "-s",
             "--size",
@@ -89,11 +90,12 @@ class DirectoryScan:
         # add a "." to indicate the starting directory in the tree, then set working dir
         if dir_path == Path("."):
             print(
-                f"[{str(self._convert_block_size(dir_path.stat().st_size)) + self.size_scale}]",
-                ".",
+                f"[{str(self._convert_block_size(dir_path.stat().st_size))}{self.size_scale}]",
+                "\033[34m.\033[0m",
             )
             dir_path = Path(self.directory)
 
+        # search all folders if flag is used, otherwise skip over hidden folders prefixed with '.'
         if self.search_all:
             dir_tree = list(dir_path.iterdir())
         else:
@@ -104,12 +106,21 @@ class DirectoryScan:
         # each item in the tree list is prefixed with a glyph and file/dir size
         structure = [self.dir_item] * (len(dir_tree) - 1) + [self.dir_last]
 
-        # TODO: add option to find X largest files/folders instead of a tree
         for glyph, path in zip(structure, dir_tree):
-            yield f"{prefix + glyph + '[' + str(self._convert_block_size(path.stat().st_size)) + self.size_scale + '] ' + path.name}"
-            # extends the prefix and recurses into directory
+            """
+            yield current directory or file to the calling function to print
+            print directories in blue
+            """
+            reset_color = "\033[0m"
+            dir_color = "\033[34m" if path.is_dir() else reset_color
+
+            yield f"{prefix}{glyph}[{str(self._convert_block_size(path.stat().st_size))}{self.size_scale}] {dir_color}{path.name}{reset_color}"
+
+            # extends the prefix and recurses into directory if current path is a directory
+            # appends dir_branch glyph if appropriate, otherwise spacing
             if path.is_dir():
                 extension = (
                     self.dir_branch if glyph == self.dir_item else self.dir_space
                 )
+                # recursively yield from run_dir_scan generator
                 yield from self.run_dir_scan(path, prefix=prefix + extension)
